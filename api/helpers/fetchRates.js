@@ -1,7 +1,7 @@
+// /api/helpers/fetchRates.js
 export async function obtenerTarifas(token, datos) {
   try {
-    // Realiza la solicitud de tarifas utilizando el token
-    const response = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/quote', {
+    const quoteResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/quote', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -27,15 +27,18 @@ export async function obtenerTarifas(token, datos) {
             zip: datos.destino
           }
         }
-      });
+      })
+    });
 
-    const tarifaData = await response.json();
-
-    if (!response.ok) {
-      throw new Error('Error al obtener las tarifas');
+    // Verifica si la respuesta fue exitosa
+    if (!quoteResponse.ok) {
+      const errorDetails = await quoteResponse.text(); // O puedes usar .json() si la respuesta es JSON
+      throw new Error(`Error al obtener las tarifas: ${errorDetails}`);
     }
 
-    return tarifaData;
+    const quoteData = await quoteResponse.json();
+
+    return quoteData;
   } catch (error) {
     throw new Error('Error al obtener las tarifas: ' + error.message);
   }
