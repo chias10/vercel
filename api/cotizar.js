@@ -15,11 +15,11 @@ export default async function handler(req, res) {
     body: JSON.stringify({
       address_from: {
         country_code: "MX",
-        zip_code: datos.cpOrigen // Por ejemplo: "54040"
+        zip_code: datos.origen // Por ejemplo: "54040"
       },
       address_to: {
         country_code: "MX",
-        zip_code: datos.cpDestino // Por ejemplo: "54040"
+        zip_code: datos.destino // Por ejemplo: "54040"
       },
       parcel: {
         currency: "MXN",
