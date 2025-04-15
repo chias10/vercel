@@ -63,8 +63,13 @@ export default async function handler(req, res) {
 
     const quoteData = await quoteResponse.json();
 
+    // Verificar el status de la respuesta
     if (!quoteResponse.ok) {
-      return res.status(quoteResponse.status).json({ error: quoteData.message || 'Error en la API externa al hacer la cotización' });
+      // Agregar la respuesta de error para diagnóstico
+      return res.status(quoteResponse.status).json({
+        error: 'Error en la API externa al hacer la cotización',
+        details: quoteData || 'No se recibió respuesta válida de la API'
+      });
     }
 
     // Extraemos las opciones y las devolvemos al cliente
