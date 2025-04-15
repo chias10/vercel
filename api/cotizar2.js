@@ -10,7 +10,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Obtener token automáticamente
+    // Obtener el token
     const loginResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/session', {
       method: 'POST',
       headers: {
@@ -24,18 +24,19 @@ export default async function handler(req, res) {
 
     const loginData = await loginResponse.json();
 
+    // Si no se obtiene el token correctamente, retornar un error
     if (!loginResponse.ok || !loginData.token) {
       return res.status(401).json({ error: 'No se pudo obtener el token' });
     }
 
     const token = loginData.token;
 
-    // Hacer la cotización con el token obtenido
-    const response = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/quote', {
+    // Realizar la cotización con el token
+    const quoteResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/quote', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'authorization': token
+        'Authorization': `Bearer ${token}`
       },
       body: JSON.stringify({
         type: "quote",
@@ -60,13 +61,14 @@ export default async function handler(req, res) {
       })
     });
 
-    const data = await response.json();
+    const quoteData = await quoteResponse.json();
 
-    if (!response.ok) {
-      return res.status(response.status).json({ error: data.message || 'Error en la API externa' });
+    if (!quoteResponse.ok) {
+      return res.status(quoteResponse.status).json({ error: quoteData.message || 'Error en la API externa al hacer la cotización' });
     }
 
-    const opciones = data.data?.map(op => ({
+    // Extraemos las opciones y las devolvemos al cliente
+    const opciones = quoteData.data?.map(op => ({
       carrier: op.carrier,
       service: op.service,
       total_price: op.total_price,
@@ -76,7 +78,7 @@ export default async function handler(req, res) {
     res.status(200).json({ options: opciones });
 
   } catch (error) {
-    console.error('Error al cotizar:', error);
+    console.error('Error al obtener el token o al cotizar:', error);
     res.status(500).json({ error: 'Error interno del servidor' });
   }
 }
