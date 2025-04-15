@@ -4,6 +4,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    console.log('Cuerpo de la solicitud (req.body):', req.body);
   const { token, datos } = req.body;
     console.log(datos);
 
