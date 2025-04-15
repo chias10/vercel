@@ -1,3 +1,4 @@
+// /api/cotizar.js
 import { obtenerToken } from './helpers/fetchToken';
 import { obtenerTarifas } from './helpers/fetchRates';
 import { formatearRespuesta } from './helpers/formatResponse';
