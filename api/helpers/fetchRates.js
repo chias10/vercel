@@ -1,7 +1,7 @@
 // /api/helpers/fetchRates.js
 export async function obtenerTarifas(token, datos) {
   try {
-    const quoteResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/quote', {
+    const quoteResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/rates', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
