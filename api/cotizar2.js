@@ -3,13 +3,34 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Método no permitido' });
   }
 
-  const { token, datos } = req.body;
+  const { datos } = req.body;
 
-  if (!token || !datos) {
+  if (!datos) {
     return res.status(400).json({ error: 'Faltan datos requeridos' });
   }
 
   try {
+    // Obtener token automáticamente
+    const loginResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/session', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        email: "aziel.cuevasf@gmail.com",
+        password: "IZMXs6c1Usb8fQ886J"
+      })
+    });
+
+    const loginData = await loginResponse.json();
+
+    if (!loginResponse.ok || !loginData.token) {
+      return res.status(401).json({ error: 'No se pudo obtener el token' });
+    }
+
+    const token = loginData.token;
+
+    // Hacer la cotización con el token obtenido
     const response = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/quote', {
       method: 'POST',
       headers: {
@@ -45,7 +66,6 @@ export default async function handler(req, res) {
       return res.status(response.status).json({ error: data.message || 'Error en la API externa' });
     }
 
-    // Devolver solo lo necesario
     const opciones = data.data?.map(op => ({
       carrier: op.carrier,
       service: op.service,
