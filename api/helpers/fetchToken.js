@@ -1,9 +1,10 @@
+// /api/helpers/fetchToken.js
 export async function obtenerToken() {
   try {
     // Usar variables de entorno para el email y la contraseña
     const email = process.env.EMAIL;
     const password = process.env.PASSWORD;
-    
+
     // Verificar que las variables de entorno estén definidas
     if (!email || !password) {
       throw new Error('Las credenciales de acceso no están configuradas correctamente.');
