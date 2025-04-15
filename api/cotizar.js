@@ -6,7 +6,8 @@ export default async function handler(req, res) {
   try {
     console.log('Cuerpo de la solicitud (req.body):', req.body);
   const { token, datos } = req.body;
-    console.log(datos);
+     console.log('Token:', token);
+    console.log('Datos:', datos);
 
   const response = await fetch('http://ec2-54-188-18-143.us-west-2.compute.amazonaws.com:4000/api/rates', {
     method: 'POST',
