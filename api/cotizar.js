@@ -4,24 +4,34 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { token, datos } = req.body;
+  const { token, datos } = req.body;
 
-    const response = await fetch('http://ec2-54-188-18-143.us-west-2.compute.amazonaws.com:4000/api/rates', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+  const response = await fetch('http://ec2-54-188-18-143.us-west-2.compute.amazonaws.com:4000/api/rates', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify({
+      address_from: {
+        country_code: "MX",
+        zip_code: datos.origen // Por ejemplo: "54040"
       },
-      body: JSON.stringify({
-        // Asegúrate que estos datos se pasen desde el frontend correctamente
-        length: parseFloat(datos.largo),
-        width: parseFloat(datos.ancho),
+      address_to: {
+        country_code: "MX",
+        zip_code: datos.destino // Por ejemplo: "54040"
+      },
+      parcel: {
+        currency: "MXN",
+        distance_unit: "CM",
         height: parseFloat(datos.alto),
+        length: parseFloat(datos.largo),
+        mass_unit: "KG",
         weight: parseFloat(datos.peso),
-        from: datos.origen,
-        to: datos.destino
-      })
-    });
+        width: parseFloat(datos.ancho)
+      }
+    })
+  });
 
     const resultado = await response.json();
     res.status(response.status).json(resultado);
