@@ -12,18 +12,33 @@ export async function cotizar(datos, token) {
     }
 
     // Realizar la solicitud de cotización
-    const cotizacionResponse = await fetch('https://cotizador-murex.vercel.app/api/cotizar', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Mobile/15E148 Safari/604.1',
-        'Referer': 'https://actrips.com.mx/generar/'
-      },
-      body: JSON.stringify({
-        token: token,
-        datos: datos
-      })
-    });
+const cotizacionResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/rates', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${token}`,  // Aquí agregamos 'Bearer' seguido del token
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    address_from: {
+      country_code: "MX",
+      zip_code: datos.origen  // Aquí puedes sustituir 'datos.zip_code_from' por la variable correspondiente
+    },
+    address_to: {
+      country_code: "MX",
+      zip_code: datos.destino  // Aquí puedes sustituir 'datos.zip_code_to' por la variable correspondiente
+    },
+    parcel: {
+      currency: "MXN",
+      distance_unit: "CM",
+      height: datos.largo,  // Sustituir por la variable de altura
+      length: datos.ancho,  // Sustituir por la variable de longitud
+      mass_unit: "KG",
+      weight: datos.peso,  // Sustituir por la variable de peso
+      width: datos.alto  // Sustituir por la variable de ancho
+    }
+  })
+});
+
 
     if (!cotizacionResponse.ok) {
       const errorDetails = await cotizacionResponse.text();
