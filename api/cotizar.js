@@ -12,7 +12,7 @@ export async function cotizar(datos, token) {
     }
 
     // Realizar la solicitud de cotización
-const cotizacionResponse = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/rates', {
+const cotizacionResponse = await fetch('http://ec2-54-188-18-143.us-west-2.compute.amazonaws.com:4000/api/rates', {
   method: 'POST',
   headers: {
     'Authorization': `Bearer ${token}`,  // Aquí agregamos 'Bearer' seguido del token
