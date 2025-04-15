@@ -1,5 +1,6 @@
 // Función para manejar la cotización y hacer la consulta a la API externa
 export async function cotizar(datos) {
+  console.log(datos);
   try {
     // Enviar los datos al archivo PHP para que los procese
     const tokenResponse = await fetch('/cotizar.php', {
