@@ -1,32 +1,74 @@
-// /api/cotizar.js
-import { obtenerToken } from './helpers/fetchToken';
-import { obtenerTarifas } from './helpers/fetchRates';
-import { formatearRespuesta } from './helpers/formatResponse';
+export async function obtenerToken() {
+  const maxIntentos = 3;
+  let intento = 0;
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
+  while (intento < maxIntentos) {
+    try {
+      const response = await fetch('http://ec2-34-209-178-62.us-west-2.compute.amazonaws.com:4000/api/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: process.env.EMAIL, password: process.env.PASSWORD })
+      });
+
+      if (response.ok) {
+        const loginData = await response.json();
+        return loginData.token;
+      } else {
+        const errorDetails = await response.text();
+        throw new Error(`Error al obtener el token: ${errorDetails}`);
+      }
+    } catch (error) {
+      if (intento === maxIntentos - 1) throw error;
+      intento++;
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Esperar 1 segundo antes de reintentar
+    }
   }
+}
 
+export async function cotizar(datos) {
   try {
-    const { token, datos } = req.body;
-
-    if (!token || !datos) {
-      return res.status(400).json({ error: 'Faltan datos o token' });
+    // Obtener el token de forma asíncrona
+    const token = await obtenerToken();
+    
+    // Validar los datos
+    if (!isValidData(datos)) {
+      throw new Error('Datos inválidos. Asegúrate de que peso, alto, largo y ancho sean números.');
     }
 
-    // 1. Verifica si ya tenemos el token o lo obtenemos
-    const authToken = token || await obtenerToken();
+    // Realizar la solicitud de cotización
+    const cotizacionResponse = await fetch('https://cotizador-murex.vercel.app/api/cotizar', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_3_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.3.1 Mobile/15E148 Safari/604.1',
+        'Referer': 'https://actrips.com.mx/generar/'
+      },
+      body: JSON.stringify({
+        token: token,
+        datos: datos
+      })
+    });
 
-    // 2. Solicita las tarifas usando el token y los datos
-    const tarifas = await obtenerTarifas(authToken, datos);
+    if (!cotizacionResponse.ok) {
+      const errorDetails = await cotizacionResponse.text();
+      throw new Error(`Error al obtener la cotización: ${errorDetails}`);
+    }
 
-    // 3. Formatea la respuesta antes de enviarla al cliente
-    const resultado = formatearRespuesta(tarifas);
+    const cotizacionData = await cotizacionResponse.json();
 
-    return res.status(200).json(resultado);
+    // Verificar si la cotización fue exitosa
+    if (!cotizacionData || cotizacionData.error) {
+      throw new Error(cotizacionData.error || 'Error al obtener la cotización');
+    }
+
+    return cotizacionData;
   } catch (error) {
-    console.error('Error al cotizar:', error);
-    return res.status(500).json({ error: 'Error al conectar con la API de cotización' });
+    // Manejo de errores
+    throw new Error(`Error en el proceso de cotización: ${error.message}`);
   }
+}
+
+// Función para validar los datos
+function isValidData(datos) {
+  return !isNaN(datos.peso) && !isNaN(datos.alto) && !isNaN(datos.largo) && !isNaN(datos.ancho);
 }
